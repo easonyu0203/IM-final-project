@@ -7,11 +7,11 @@ main.o: main.cpp
 Snake.o: Snake.cpp Snake.h
 	g++ -c Snake.cpp -std=c++11 -o Snake.o
 
-GenerateMap:
+maps:
 	g++ mapGenerate1_100.cpp -std=c++11 -o map1_100
 	g++ mapGenerate101_200.cpp -std=c++11 -o map101_200
 	./map1_100
 	./map101_200
 
 clean:
-	rm -rf main.o Snake.o test main map1_100 map101_200
+	rm -rf main.o Snake.o test main map1_100 map101_200 trivial

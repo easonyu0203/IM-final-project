@@ -16,8 +16,13 @@
 #include "Snake.h"
 
 #define DEBUG 1
-#define playing true
+#define PLAYING true
+#define SKIP_POINT 100
+#define milli_sec_past_per_frame 10
 using namespace std;
+
+auto start_t = std::chrono::high_resolution_clock::now();
+auto finish_t = std::chrono::high_resolution_clock::now();
 
 const int NUM_MAP = 200;
 
@@ -263,9 +268,15 @@ int main(int argc, char* argv[])
 		std::cout << "current map index: " << cur_map_index << std::endl;
 		std::cout << "current step: " << i << std::endl;
 		std::cout << "point       : " << point << std::endl;
-		if(playing && cur_map_index > 100){
+		if(PLAYING && cur_map_index > SKIP_POINT){
+			finish_t = std::chrono::high_resolution_clock::now();
+			auto past_time = std::chrono::duration_cast<std::chrono::milliseconds>(finish_t - start_t);
+			std::cout << "past_time: " << past_time.count() << std::endl;
+			if(cur_map_index != 1 && past_time < std::chrono::milliseconds(milli_sec_past_per_frame)){
+				std::this_thread::sleep_for(std::chrono::milliseconds(milli_sec_past_per_frame) - past_time);
+			}
 			print_game(snake, map);
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			start_t = std::chrono::high_resolution_clock::now();
 		}
 		#endif
         ori_pos = new_pos;
@@ -319,7 +330,7 @@ int main(int argc, char* argv[])
 				//output the current state
 				std::cout << "current step: " << i << std::endl;
 				std::cout << "point       : " << point << std::endl;
-				std::cout << "I won!!! bitch!!\n";
+				std::cout << "YOU WIN!!!\n";
 				print_game(snake, map);
 				return 0;
 			}
