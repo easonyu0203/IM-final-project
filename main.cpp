@@ -1,4 +1,4 @@
-﻿#define _CRT_SECURE_NO_WARNINGS
+﻿// #define _CRT_SECURE_NO_WARNINGS
 
 #include <cmath>
 #include <cstring>
@@ -15,10 +15,11 @@
 
 #include "Snake.h"
 
+
 #define DEBUG 1
 #define PLAYING true
-#define SKIP_POINT 100
-#define milli_sec_past_per_frame 10
+#define SKIP_POINT 143
+#define milli_sec_past_per_frame 30
 using namespace std;
 
 auto start_t = std::chrono::high_resolution_clock::now();
@@ -260,7 +261,7 @@ int main(int argc, char* argv[])
 
     int step_limit = 8000;
     int point = 0;
-    cout << get<0>(new_pos.back()) << ", " << get<1>(new_pos.back()) << "|" << point << "\n";
+    // cout << get<0>(new_pos.back()) << ", " << get<1>(new_pos.back()) << "|" << point << "\n";
 
     for (int i = 0; i < step_limit; i++) {
 		#if DEBUG == 1
@@ -271,7 +272,6 @@ int main(int argc, char* argv[])
 		if(PLAYING && cur_map_index > SKIP_POINT){
 			finish_t = std::chrono::high_resolution_clock::now();
 			auto past_time = std::chrono::duration_cast<std::chrono::milliseconds>(finish_t - start_t);
-			std::cout << "past_time: " << past_time.count() << std::endl;
 			if(cur_map_index != 1 && past_time < std::chrono::milliseconds(milli_sec_past_per_frame)){
 				std::this_thread::sleep_for(std::chrono::milliseconds(milli_sec_past_per_frame) - past_time);
 			}
@@ -284,7 +284,7 @@ int main(int argc, char* argv[])
 
         int new_head_x = get<0>(new_pos.back());
         int new_head_y = get<1>(new_pos.back());
-        cout << i << ": " << get<0>(new_pos.back()) << ", " << get<1>(new_pos.back()) << "|" << map[new_head_x][new_head_y] << "$" << point << "\n";
+        // cout << i << ": " << get<0>(new_pos.back()) << ", " << get<1>(new_pos.back()) << "|" << map[new_head_x][new_head_y] << "$" << point << "\n";
 
         // Walk one step
         int one_step_limit = 1;

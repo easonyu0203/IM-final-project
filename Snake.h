@@ -1,3 +1,4 @@
+#pragma once
 #include <queue>
 #include<set>
 #include <tuple>
@@ -7,25 +8,26 @@
 #include<stack>
 #include<utility>
 #include<iostream>
+#include<exception>
 
 
 class Snake {
 private:
 	//back() = head, front() = tail
-	std::queue<std::tuple<int, int> > position;
-	// std::vector<std::vector<int> > hamilton_map;
-private:
-	std::pair<std::stack<std::pair<int, int> >, bool> a_star_pathfinding(std::pair<int, int> src, std::pair<int, int> des, std::vector<std::vector<int> > map);
-	std::stack<std::pair<int, int> > take_moves;
-	// bool is_valid_by_hamilton_order(std::pair<int, int>);
-	
-	
+	//snake positions
+	std::queue<std::tuple<int, int>> position;
+	//greedy mode
+	std::stack<std::tuple<int, int>> scheduled_steps;
+	//suvival mode
+	std::stack<std::tuple<int, int>> backup_steps;
+	//you are fuck up mode
 public:
 	// Don't edit interface
 	Snake(std::queue<std::tuple<int, int>> startPosition);
 	std::queue<std::tuple<int, int>> nextPosition(std::vector<std::vector<int>> map);
-	
-	// Add anything else you need
 	std::queue<std::tuple<int, int>>& get_position(){return position; } 
+	int size() const {return position.size();}
+	const std::tuple<int, int>& head_pos() const {return position.back();}
+	const std::tuple<int, int>& tail_pos() const {return position.front();}
 };
 
