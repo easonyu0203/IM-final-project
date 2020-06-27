@@ -18,8 +18,8 @@
 
 #define DEBUG 1
 #define PLAYING true
-#define SKIP_POINT 143
-#define milli_sec_past_per_frame 30
+#define SKIP_POINT 200
+#define milli_sec_per_frame 30
 using namespace std;
 
 auto start_t = std::chrono::high_resolution_clock::now();
@@ -244,6 +244,8 @@ vector<vector<int>> get_map()
 //	return map[mapindex];
 //}
 
+bool first =true;
+
 int main(int argc, char* argv[])
 {
     queue<tuple<int, int>> ori_pos;
@@ -269,12 +271,15 @@ int main(int argc, char* argv[])
 		std::cout << "current map index: " << cur_map_index << std::endl;
 		std::cout << "current step: " << i << std::endl;
 		std::cout << "point       : " << point << std::endl;
-		if(PLAYING && cur_map_index > SKIP_POINT){
+		if(PLAYING && cur_map_index >= SKIP_POINT){
+
 			finish_t = std::chrono::high_resolution_clock::now();
 			auto past_time = std::chrono::duration_cast<std::chrono::milliseconds>(finish_t - start_t);
-			if(cur_map_index != 1 && past_time < std::chrono::milliseconds(milli_sec_past_per_frame)){
-				std::this_thread::sleep_for(std::chrono::milliseconds(milli_sec_past_per_frame) - past_time);
+			if(!first && past_time < std::chrono::milliseconds(milli_sec_per_frame)){
+
+				std::this_thread::sleep_for(std::chrono::milliseconds(milli_sec_per_frame) - past_time);
 			}
+			first = false;
 			print_game(snake, map);
 			start_t = std::chrono::high_resolution_clock::now();
 		}

@@ -17,7 +17,7 @@ std::queue<std::tuple<int, int>> Snake::nextPosition(std::vector<std::vector<int
 		//try find path to fruit, fruit bigger is better
 		for(auto& fruit_pos : fruit_positions){
 			try{
-				scheduled_steps = shortest_path_finder(head_pos(), fruit_pos, map, position, basic_is_valid_successor);
+				scheduled_steps = shortest_path_finder(head_pos(), fruit_pos, map, position, big_head_vision_is_valid_succesor);
 				//find successful
 				//clear backup steps
 				while(!backup_steps.empty()) backup_steps.pop();
@@ -29,7 +29,9 @@ std::queue<std::tuple<int, int>> Snake::nextPosition(std::vector<std::vector<int
 
 		//if not find any path to fruit
 		if(scheduled_steps.empty() && backup_steps.empty()){
-			std::cout << "not find path to fruit!\n"; std::cin.get();
+			
+			// std::cout << "not find path to fruit!\n"; std::cin.get();
+
 			auto v_snake_positions = make_vec_snake_position(position);
 			//try find longest path to tail, if not then tail-1 and so on
 			for(int i = 1; i < v_snake_positions.size() - 2; i++){

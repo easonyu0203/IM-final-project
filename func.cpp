@@ -6,6 +6,7 @@
 #include<set>
 #include<unordered_set>
 #include<stack>
+#include<iomanip>
 #include<algorithm>
 #include<utility>
 #include<exception>
@@ -13,8 +14,9 @@
 #include"Snake.h"
 
 #define MIN_HEAD_VISION_PERCENT 80
-#define BASIC_WEIGHT 10
-#define AROUND_SNAKE_WEIGHT 5
+#define BASIC_WEIGHT 15
+#define AROUND_SNAKE_WEIGHT 10
+#define IN_SNAKE_WEIGHT 5
 
 #define FUNC_DEBUG 0
 
@@ -73,7 +75,7 @@ void Cells_map::update(std::tuple<int, int> successor, std::tuple<int, int> pare
 	#endif
 	data_container[std::get<0>(successor)][std::get<1>(successor)].parent = parent;
 	data_container[std::get<0>(successor)][std::get<1>(successor)].real_cost = get_real_cost(parent) + weight_map[std::get<0>(successor)][std::get<1>(successor)];
-	data_container[std::get<0>(successor)][std::get<1>(successor)].heuristic_cost = std::abs(std::get<0>(successor) - std::get<0>(des)) + std::abs(std::get<1>(successor) - std::get<1>(des));
+	data_container[std::get<0>(successor)][std::get<1>(successor)].heuristic_cost = (std::abs(std::get<0>(successor) - std::get<0>(des)) + std::abs(std::get<1>(successor) - std::get<1>(des))) * BASIC_WEIGHT;
 	data_container[std::get<0>(successor)][std::get<1>(successor)].total_estimate_cost = get_real_cost(successor) + get_heuristic_cost(successor);
 	data_container[std::get<0>(successor)][std::get<1>(successor)].step_count_to_here = get_step_count_to_here(parent) + 1;
 }
@@ -93,12 +95,14 @@ std::stack<std::tuple<int, int>> shortest_path_finder(const std::tuple<int, int>
 std::stack<std::tuple<int, int>>&& longest_path_finder(const std::tuple<int, int>& scr, const std::tuple<int, int>& des,\
 	const std::vector<std::vector<int>>& map, const std::queue<std::tuple<int, int>>& snake_posisitions);
 
+*/
+
 //determine a point is valid to go or not
 //hit wall, hit snake itself(dynamic), head's vision is > MIN_HEAD_VISION_PERCENT
 bool big_head_vision_is_valid_succesor(const std::tuple<int, int>& successor, const std::tuple<int, int>& parent,\
 	const std::vector<std::vector<int>>& map, const std::vector<std::tuple<int, int>>& v_snake_positions, const Cells_map& cells_data_map);
 
-*/
+
 
 //determine a point is valid to go or not
 //hit wall, hit snake itself(static)
@@ -158,18 +162,52 @@ std::tuple<int, int> random_step(const std::vector<std::vector<int>>& map, const
 	return out;
 }
 
+std::vector<std::tuple<int, int>> get_successors_positions(const std::tuple<int, int> target);
+
 //return vec<vec<int>> wieght map that take in consideration of snake position
-std::vector<std::vector<int>> make_weight_map(const std::vector<std::vector<int>>& map){
+std::vector<std::vector<int>> make_weight_map(const std::vector<std::vector<int>>& map, const std::vector<std::tuple<int, int>>& v_snake_posistions){
 	std::vector<std::vector<int>> weight_map;
 	weight_map = map;
+	
+	//point that >= 0, empty spot and fruit spot
 	for(auto& row : weight_map)
-		for(int& v : row){
-			if(v == -1) v = INT32_MAX;
+		for(int& v : row)
 			if(v >= 0) v = BASIC_WEIGHT;
-			#if FUNC_DEBUG == 1
-			throw std::runtime_error("can't create weight map, have undefine point");
-			#endif
+	
+	//draw around snake
+	weight_map[std::get<0>(v_snake_posistions.back()) - 1][std::get<1>(v_snake_posistions.back()) - 1] = AROUND_SNAKE_WEIGHT;
+	weight_map[std::get<0>(v_snake_posistions.back()) + 1][std::get<1>(v_snake_posistions.back()) + 1] = AROUND_SNAKE_WEIGHT;
+	weight_map[std::get<0>(v_snake_posistions.back()) - 1][std::get<1>(v_snake_posistions.back()) + 1] = AROUND_SNAKE_WEIGHT;
+	weight_map[std::get<0>(v_snake_posistions.back()) + 1][std::get<1>(v_snake_posistions.back()) - 1] = AROUND_SNAKE_WEIGHT;
+	for(int i = 1; i < v_snake_posistions.size(); i++){
+		auto successors_positions = get_successors_positions(v_snake_posistions[i]);
+		for(auto& successor : successors_positions){
+			weight_map[std::get<0>(successor)][std::get<1>(successor)] = AROUND_SNAKE_WEIGHT;
 		}
+	}
+	
+	//draw inside snake
+	for(int i = 1; i < v_snake_posistions.size(); i++){
+		weight_map[std::get<0>(v_snake_posistions[i])][std::get<1>(v_snake_posistions[i])] = IN_SNAKE_WEIGHT;
+	}
+
+	//draw wall
+	for(int i = 0; i < map.size(); i++)
+		for(int j = 0; j < map.size(); j++){
+			if(map[i][j] == -1) weight_map[i][j] = INT32_MAX;
+		}
+	
+	#if FUNC_DEBUG == 1
+	for(int i = 0; i < map.size(); i++){
+		for(int j = 0; j < map.size(); j++){
+			if(weight_map[i][j] != INT32_MAX) std::cout << std::setw(3) << weight_map[i][j] << " ";
+			else std::cout << "max ";
+		}
+		std::cout << std::endl;
+	}
+	std::cin.get();
+	#endif
+
 	return weight_map;
 }
 
@@ -203,8 +241,8 @@ std::stack<std::tuple<int, int>> shortest_path_finder(const std::tuple<int, int>
 	bool (*is_valid_successor)(const std::tuple<int, int>& successor, const std::tuple<int, int>& parent,\
 	const std::vector<std::vector<int>>& map, const std::vector<std::tuple<int, int>>& v_snake_positions, const Cells_map& cells_data_map)){
 	//set up and init
-	auto weight_map = make_weight_map(map);
 	auto v_snake_positions = make_vec_snake_position(q_snake_positions);
+	auto weight_map = make_weight_map(map, v_snake_positions);
 	Cells_map cells_data_map(src, des, map.size());
 	std::set<std::tuple<int, int>> closed_list;
 	std::set<std::tuple<int, int>> open_list;
@@ -259,11 +297,7 @@ std::stack<std::tuple<int, int>> shortest_path_finder(const std::tuple<int, int>
 					}
 				}
 			}
-			#if FUNC_DEBUG == 1
-			std::cin.get();
-			#endif
 		}
-
 
 	}
 
@@ -280,9 +314,47 @@ bool basic_is_valid_successor(const std::tuple<int, int>& successor, const std::
 	//hit wall
 	if(map[std::get<0>(successor)][std::get<1>(successor)] < 0) return false;
 	//ht itself
-	if(std::find(v_snake_positions.begin(), v_snake_positions.end(), successor) != v_snake_positions.end()) return false;
+	if(std::find(v_snake_positions.begin() + 1, v_snake_positions.end(), successor) != v_snake_positions.end()) return false;
 	//safe
 	return true;
 
+}
+
+//forwar_pos--successor--parent will on one line
+std::tuple<int, int> make_forward_position(const std::tuple<int, int>& successor, const std::tuple<int, int>& parent){
+	return std::make_tuple((std::get<0>(successor))*2 - std::get<0>(parent), (std::get<1>(successor))*2 - std::get<1>(parent));
+}
+std::pair<std::tuple<int, int>, std::tuple<int, int>> make_side_position(const std::tuple<int, int>& successor, const std::tuple<int, int>& parent){
+	if(std::get<0>(successor) == std::get<0>(parent)){
+		return std::make_pair(std::make_tuple(std::get<0>(successor) - 1, std::get<1>(successor)), std::make_tuple(std::get<0>(successor) + 1, std::get<1>(successor)));
+	}else{
+		return std::make_pair(std::make_tuple(std::get<0>(successor), std::get<1>(successor) - 1), std::make_tuple(std::get<0>(successor), std::get<1>(successor) + 1));
+	}
+}
+
+std::vector<std::tuple<int, int>> make_v_virtual_snake(const std::tuple<int, int>& successor, const std::tuple<int, int>& parent, const Cells_map& cells_data_map, std::vector<std::tuple<int, int>>& v_snake_positions){
+
+}
+
+
+//determine a point is valid to go or not
+//hit wall, hit snake itself(dynamic), head's vision is > MIN_HEAD_VISION_PERCENT
+bool big_head_vision_is_valid_succesor(const std::tuple<int, int>& successor, const std::tuple<int, int>& parent,\
+	const std::vector<std::vector<int>>& map, const std::vector<std::tuple<int, int>>& v_snake_positions, const Cells_map& cells_data_map){
+	
+	//check hit wall
+	if(map[std::get<0>(successor)][std::get<1>(successor)] < 0) return false;
+
+	//check hit itself(dynamic)
+	if(cells_data_map.get_step_count_to_here(parent) < v_snake_positions.size()){
+		if(std::find(v_snake_positions.begin() + cells_data_map.get_step_count_to_here(parent), v_snake_positions.end(), successor) != v_snake_positions.end()){
+			return false;
+		}
+	}
+
+	//check head vision 
+
+	
+	return true;
 }
 
