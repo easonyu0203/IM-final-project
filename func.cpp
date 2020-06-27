@@ -14,9 +14,9 @@
 #include"Snake.h"
 
 #define MIN_HEAD_VISION_PERCENT 80
-#define BASIC_WEIGHT 15
-#define AROUND_SNAKE_WEIGHT 10
-#define IN_SNAKE_WEIGHT 5
+#define BASIC_WEIGHT 100
+#define AROUND_SNAKE_WEIGHT 99
+#define IN_SNAKE_WEIGHT 98
 
 #define FUNC_DEBUG 0
 
@@ -41,6 +41,7 @@ class Cells_map{
 		};
 	private:
 		std::vector<std::vector<Cell>> data_container;
+	public:
 		std::tuple<int, int> src;
 		std::tuple<int, int> des;
 	public:
@@ -133,6 +134,14 @@ std::vector<std::tuple<int, int>> make_vec_snake_position(const std::queue<std::
 		tmp.pop();
 	}
 	return out;
+}
+
+std::queue<std::tuple<int, int>> make_que_snake_position(const std::vector<std::tuple<int, int>>& v_position){
+	std::queue<std::tuple<int, int>> q;
+	for(int i = 1; i < v_position.size(); i++){
+		q.push(v_position[i]);
+	}
+	return q;
 }
 
 //return a step that is valid to go, if there isn't any, then return random step
@@ -272,6 +281,11 @@ std::stack<std::tuple<int, int>> shortest_path_finder(const std::tuple<int, int>
 		//check this point successor and update their status
 		auto successors_positions = get_successors_positions(examing_point);
 		for(auto& successor : successors_positions){
+			//if des is tail, we need to check des here
+			if(successor == des && successor == q_snake_positions.front()){
+				cells_data_map.update(successor, examing_point, weight_map);
+				return trace_path(src, des, cells_data_map);
+			}
 			//basic condition, this successor must be valid
 			if(closed_list.find(successor) == closed_list.end() && is_valid_successor(successor, examing_point, map, v_snake_positions, cells_data_map)){
 				//if this is des, then we successful find a path
@@ -324,6 +338,7 @@ bool basic_is_valid_successor(const std::tuple<int, int>& successor, const std::
 std::tuple<int, int> make_forward_position(const std::tuple<int, int>& successor, const std::tuple<int, int>& parent){
 	return std::make_tuple((std::get<0>(successor))*2 - std::get<0>(parent), (std::get<1>(successor))*2 - std::get<1>(parent));
 }
+
 std::pair<std::tuple<int, int>, std::tuple<int, int>> make_side_position(const std::tuple<int, int>& successor, const std::tuple<int, int>& parent){
 	if(std::get<0>(successor) == std::get<0>(parent)){
 		return std::make_pair(std::make_tuple(std::get<0>(successor) - 1, std::get<1>(successor)), std::make_tuple(std::get<0>(successor) + 1, std::get<1>(successor)));
@@ -332,10 +347,57 @@ std::pair<std::tuple<int, int>, std::tuple<int, int>> make_side_position(const s
 	}
 }
 
-std::vector<std::tuple<int, int>> make_v_virtual_snake(const std::tuple<int, int>& successor, const std::tuple<int, int>& parent, const Cells_map& cells_data_map, std::vector<std::tuple<int, int>>& v_snake_positions){
-
+//forward a snake to a virtaul snake that it head is at successor
+std::vector<std::tuple<int, int>> make_v_virtual_snake(const std::tuple<int, int>& successor, const std::tuple<int, int>& parent, const Cells_map& cells_data_map,const std::vector<std::tuple<int, int>>& v_snake_positions){
+	auto q_snake_positions = make_que_snake_position(v_snake_positions);
+	auto path_to_parent = trace_path(q_snake_positions.back(), parent, cells_data_map);
+	while(!path_to_parent.empty()){
+		q_snake_positions.push(path_to_parent.top()); path_to_parent.pop();
+		q_snake_positions.pop();
+	}
+	q_snake_positions.push(successor);
+	q_snake_positions.pop();
+	return make_vec_snake_position(q_snake_positions);
 }
 
+//a virtual map that treat snake as wall
+std::vector<std::vector<int>> make_virtual_map(const std::vector<std::vector<int>>& map, const std::vector<std::tuple<int,int>>& snake_positions){
+	auto virtual_map = map;
+	for(int i = 1; i < snake_positions.size(); i++)
+		virtual_map[std::get<0>(snake_positions[i])][std::get<1>(snake_positions[i])] = -1;
+	return virtual_map;
+}
+
+//count the src vision and return whether contain des
+std::pair<int, bool> bruforce_finding(const std::tuple<int, int> src, const std::tuple<int, int> des, const std::vector<std::vector<int>>& map){
+	//check src is valid
+	if(map[std::get<0>(src)][std::get<1>(src)] == -1) return std::make_pair(0, false);
+
+	int count = 0;
+	bool have_des = false;
+	//use set to find des and count
+	std::vector<std::tuple<int, int>> closed_list;
+	std::vector<std::tuple<int, int>> open_list;
+	open_list.push_back(src);
+	while(!open_list.empty()){
+		auto examing_pos = open_list.back(); open_list.pop_back();
+		closed_list.push_back(examing_pos);
+		auto successors = get_successors_positions(examing_pos);
+		for(auto& successor : successors){
+			//not hit wall and not in closed list and open list
+			if(map[std::get<0>(successor)][std::get<1>(successor)] != -1 &&\
+			 std::find(closed_list.begin(), closed_list.end(), successor) == closed_list.end() &&\
+			 std::find(open_list.begin(), open_list.end(), successor) == open_list.end()){
+				open_list.push_back(successor);
+			}
+			//check whether contain des
+			if(successor == des) have_des = true;
+		}
+	}
+	count = closed_list.size();
+
+	return std::make_pair(count, have_des);
+}
 
 //determine a point is valid to go or not
 //hit wall, hit snake itself(dynamic), head's vision is > MIN_HEAD_VISION_PERCENT
@@ -343,7 +405,7 @@ bool big_head_vision_is_valid_succesor(const std::tuple<int, int>& successor, co
 	const std::vector<std::vector<int>>& map, const std::vector<std::tuple<int, int>>& v_snake_positions, const Cells_map& cells_data_map){
 	
 	//check hit wall
-	if(map[std::get<0>(successor)][std::get<1>(successor)] < 0) return false;
+	if(map[std::get<0>(successor)][std::get<1>(successor)] == -1) return false;
 
 	//check hit itself(dynamic)
 	if(cells_data_map.get_step_count_to_here(parent) < v_snake_positions.size()){
@@ -351,8 +413,76 @@ bool big_head_vision_is_valid_succesor(const std::tuple<int, int>& successor, co
 			return false;
 		}
 	}
+	
+	// check head vision 
+	//get arounding position
+	std::tuple<int, int> forward_pos = make_forward_position(successor, parent);
+	std::tuple<int, int> a_side_pos, b_side_pos;
+	std::tie(a_side_pos, b_side_pos) = make_side_position(successor, parent);
+	auto fruit_pos = cells_data_map.des;
 
-	//check head vision 
+	//if forward pos is wall or snake, need to check vision
+	if(map[std::get<0>(forward_pos)][std::get<1>(forward_pos)] == -1 ||\
+	(cells_data_map.get_step_count_to_here(parent) < v_snake_positions.size() && std::find(v_snake_positions.begin() + cells_data_map.get_step_count_to_here(parent), v_snake_positions.end(), forward_pos) != v_snake_positions.end()) ){
+
+		//if have a path to tail, then no need to worry about vision
+		try{
+			auto to_tail_path = shortest_path_finder(successor, make_v_virtual_snake(successor, parent, cells_data_map, v_snake_positions)[1], map, make_que_snake_position(make_v_virtual_snake(successor, parent, cells_data_map, v_snake_positions)), basic_is_valid_successor);
+			//find successful
+			//no need to check vision
+
+		}catch(std::logic_error e){
+
+			return false;
+			
+			auto virtual_snake = make_v_virtual_snake(successor, parent, cells_data_map, v_snake_positions);
+			auto virtual_map = make_virtual_map(map, virtual_snake);
+			//check a side
+			int vision;
+			bool contain_des;
+			std::tie(vision, contain_des) = bruforce_finding(a_side_pos, fruit_pos, virtual_map);
+			//see whether it >= min vision, have des
+			//if not check other side
+			if( !( (float(vision)/float(map.size()*map.size()) >= float(MIN_HEAD_VISION_PERCENT)/float(100)) && contain_des ) ){
+				std::tie(vision, contain_des) = bruforce_finding(b_side_pos, fruit_pos, virtual_map);
+			}
+			//if both doesn't satisfy
+			if( !( (float(vision)/float(map.size()*map.size()) >= float(MIN_HEAD_VISION_PERCENT)/float(100)) && contain_des ) ){
+				return false;
+			}
+			
+		}
+
+	}
+
+	//if both side is wall or snake, need check vision
+	if( ( map[std::get<0>(a_side_pos)][std::get<1>(a_side_pos)] == -1 ||\
+		(cells_data_map.get_step_count_to_here(parent) < v_snake_positions.size() && std::find(v_snake_positions.begin() + cells_data_map.get_step_count_to_here(parent), v_snake_positions.end(), a_side_pos) != v_snake_positions.end() ) ) &&\
+		( map[std::get<0>(b_side_pos)][std::get<1>(b_side_pos)] == -1 ||\
+		(cells_data_map.get_step_count_to_here(parent) < v_snake_positions.size() && std::find(v_snake_positions.begin() + cells_data_map.get_step_count_to_here(parent), v_snake_positions.end(), b_side_pos) != v_snake_positions.end() ) ) ){
+
+		//if have a path to tail, then no need to worry about vision
+		try{
+			auto to_tail_path = shortest_path_finder(successor, make_v_virtual_snake(successor, parent, cells_data_map, v_snake_positions)[1], map, make_que_snake_position(make_v_virtual_snake(successor, parent, cells_data_map, v_snake_positions)), basic_is_valid_successor);
+			//find successful
+			//no need to check vision
+			
+		}catch(std::logic_error e){
+
+			return false;
+
+			auto virtual_snake = make_v_virtual_snake(successor, parent, cells_data_map, v_snake_positions);
+			auto virtual_map = make_virtual_map(map, virtual_snake);
+			int vision;
+			bool contain_des;
+			std::tie(vision, contain_des) = bruforce_finding(forward_pos, fruit_pos, virtual_map);
+			if( !( (float(vision)/float(map.size()*map.size()) >= float(MIN_HEAD_VISION_PERCENT)/float(100)) && contain_des ) ){
+				return false;
+			}
+		}
+
+	
+	}
 
 	
 	return true;

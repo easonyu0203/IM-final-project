@@ -18,7 +18,7 @@
 
 #define DEBUG 1
 #define PLAYING true
-#define SKIP_POINT 200
+#define SKIP_POINT 201
 #define milli_sec_per_frame 30
 using namespace std;
 

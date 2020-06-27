@@ -13,5 +13,10 @@ maps:
 	./map1_100
 	./map101_200
 
+play:
+	make maps
+	make main
+	./main AAA
+
 clean:
 	rm -rf main.o Snake.o test main map1_100 map101_200 trivial
