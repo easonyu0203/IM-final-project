@@ -13,7 +13,6 @@
 #include <thread>
 #include<iomanip>
 #include <chrono>
-#include <unistd.h>
 
 #include "Snake.h"
 
@@ -424,9 +423,7 @@ void print_game(Snake& snake, const vector<vector<int>>& _map){
 	for(int i = 0; i < map.size(); i++){
 		for(int j = 0; j < map.size(); j++){
 			if(map[i][j] == -10){
-				if(snake.head_pos() == make_tuple(i, j)) std::cout << RED << "X " << RESET;
-				else if(snake.tail_pos() == make_tuple(i, j)) std::cout << BLUE << "X " << RESET;
-				else std::cout << "X ";
+				std::cout << "X ";
 			}
 			else if(map[i][j] == -1){
 				std::cout << "* ";
