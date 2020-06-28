@@ -18,15 +18,15 @@
 #include "Snake.h"
 
 //whether cout or not(print map)
-#define COUT 0
+#define COUT 1
 //whether cout result or not
 #define COUT_RESULT 1
 //write result to file or not
 #define WRITE_RESULT_TO_FILE 1
 //skip map index to 
-#define SKIP_POINT 100
+#define SKIP_POINT 160
 //milli second per frame
-#define milli_sec_per_frame 30
+#define milli_sec_per_frame 50
 
 
 

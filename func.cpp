@@ -23,7 +23,7 @@
 #define FUNC_DEBUG 0
 
 //find fruit position
-std::vector<std::tuple<int, int>> find_fruit_positions(const std::vector<std::vector<int>>& map);
+std::vector<std::tuple<int, int>> find_fruit_positions(const std::vector<std::vector<int>>& map, const std::queue<std::tuple<int, int>>& q_snake_positions);
 
 //make a vector contain snake position with tail at index 1 and head at index size()-1
 std::vector<std::tuple<int, int>> make_vec_snake_position(const std::queue<std::tuple<int, int>>& q_position);
@@ -89,7 +89,8 @@ void Cells_map::update(std::tuple<int, int> successor, std::tuple<int, int> pare
 std::stack<std::tuple<int, int>> shortest_path_finder(const std::tuple<int, int>& scr, const std::tuple<int, int>& des, bool valid_des,\
 	const std::vector<std::vector<int>>& map, const std::queue<std::tuple<int, int>>& snake_positions,\
 	bool (*is_valid_successor)(const std::tuple<int, int>& successor, const std::tuple<int, int>& parent,\
-	const std::vector<std::vector<int>>& map, const std::queue<std::tuple<int, int>>& snake_positions, const Cells_map& cells_data_map));
+	const std::vector<std::vector<int>>& map, const std::queue<std::tuple<int, int>>& snake_positions, const Cells_map& cells_data_map),\
+	std::vector<std::vector<int>> (*make_weight_map)(const std::vector<std::vector<int>>& map, const std::vector<std::tuple<int, int>>& v_snake_posistions));
 
 //determine a point is valid to go or not
 //hit wall, hit snake itself(dynamic), head's vision is > MIN_HEAD_VISION_PERCENT
@@ -104,7 +105,7 @@ bool static_is_valid_successor(const std::tuple<int, int>& successor, const std:
 	const std::vector<std::vector<int>>& map, const std::vector<std::tuple<int, int>>& v_snake_positions, const Cells_map& cells_data_map);
 
 //find fruit position, return a sorted vector which sort from large to small
-std::vector<std::tuple<int, int>> find_fruit_positions(const std::vector<std::vector<int>>& map){
+std::vector<std::tuple<int, int>> find_fruit_positions(const std::vector<std::vector<int>>& map, const std::queue<std::tuple<int, int>>& q_snake_positions){
 	std::vector<std::tuple<int, int>> out;
 	for(int i = 0; i < map.size(); i++)
 		for(int j = 0; j < map[0].size(); j++){
@@ -113,7 +114,13 @@ std::vector<std::tuple<int, int>> find_fruit_positions(const std::vector<std::ve
 			}
 		}
 
-	if(out.size() > 1) std::sort(out.begin(), out.end(), [&map](std::tuple<int, int> a, std::tuple<int, int> b){return map[std::get<0>(a)][std::get<1>(a)] > map[std::get<0>(b)][std::get<1>(b)];});
+	if(out.size() > 1) std::sort(out.begin(), out.end(), [&map, &q_snake_positions](std::tuple<int, int> a, std::tuple<int, int> b){
+		if(map[std::get<0>(a)][std::get<1>(a)] > map[std::get<0>(b)][std::get<1>(b)]) return true;
+		else if((map[std::get<0>(a)][std::get<1>(a)] < map[std::get<0>(b)][std::get<1>(b)])) return false;
+		//when same
+		return std::abs(std::get<0>(a) - std::get<0>(q_snake_positions.back())) + std::abs(std::get<1>(a) - std::get<1>(q_snake_positions.back())) < \
+		std::abs(std::get<0>(b) - std::get<0>(q_snake_positions.back())) + std::abs(std::get<1>(b) - std::get<1>(q_snake_positions.back()));
+	});
 
 	return out;
 }
@@ -174,7 +181,7 @@ std::tuple<int, int> random_step(const std::vector<std::vector<int>>& map, const
 std::vector<std::tuple<int, int>> get_successors_positions(const std::tuple<int, int> target);
 
 //return vec<vec<int>> wieght map that take in consideration of snake position
-std::vector<std::vector<int>> make_weight_map(const std::vector<std::vector<int>>& map, const std::vector<std::tuple<int, int>>& v_snake_posistions){
+std::vector<std::vector<int>> make_low_around_snake_weight_map(const std::vector<std::vector<int>>& map, const std::vector<std::tuple<int, int>>& v_snake_posistions){
 	std::vector<std::vector<int>> weight_map;
 	weight_map = map;
 	
@@ -248,7 +255,8 @@ std::stack<std::tuple<int, int>> trace_path(const std::tuple<int, int>& src, con
 std::stack<std::tuple<int, int>> shortest_path_finder(const std::tuple<int, int>& src, const std::tuple<int, int>& des, bool valid_des,\
 	const std::vector<std::vector<int>>& map, const std::queue<std::tuple<int, int>>& q_snake_positions,\
 	bool (*is_valid_successor)(const std::tuple<int, int>& successor, const std::tuple<int, int>& parent,\
-	const std::vector<std::vector<int>>& map, const std::vector<std::tuple<int, int>>& v_snake_positions, const Cells_map& cells_data_map)){
+	const std::vector<std::vector<int>>& map, const std::vector<std::tuple<int, int>>& v_snake_positions, const Cells_map& cells_data_map),\
+	std::vector<std::vector<int>> (*make_weight_map)(const std::vector<std::vector<int>>& map, const std::vector<std::tuple<int, int>>& v_snake_posistions)){
 	//set up and init
 	auto v_snake_positions = make_vec_snake_position(q_snake_positions);
 	auto weight_map = make_weight_map(map, v_snake_positions);
@@ -465,7 +473,7 @@ std::pair<bool, std::stack<std::tuple<int, int>>> bigger_path_finder(const std::
 	auto v_snake_position = make_vec_snake_position(q_snake_position);
 	auto virtual_map = make_virtual_map(map, v_snake_position);
 	//try find a path first
-	stack_path = shortest_path_finder(src, des, false, map, q_snake_position, static_is_valid_successor);
+	stack_path = shortest_path_finder(src, des, false, map, q_snake_position, static_is_valid_successor, make_low_around_snake_weight_map);
 	//successfully find a path from src -> des
 	//tranform to link list
 	std::list<std::tuple<int, int>> link_path;
@@ -477,7 +485,7 @@ std::pair<bool, std::stack<std::tuple<int, int>>> bigger_path_finder(const std::
 	auto iter = link_path.begin();
 	auto next_iter = link_path.begin();
 	next_iter++;
-	//when step cnt < min step cnt and stiil cant enlarge path
+	//when step cnt < min step cnt and stikl cant enlarge path
 	while(link_path.size() < min_step_cnt && next_iter != link_path.end()){
 		//side successor
 		std::tuple<int, int> a_1;
@@ -522,7 +530,7 @@ std::pair<bool, std::stack<std::tuple<int, int>>> bigger_path_finder(const std::
 
 	//if stack path size == 1, then fail to find path since it one step into itself
 	if(stack_path.size() == 0) throw std::logic_error("one step to itself");
-	if(link_path.size() >= min_step_cnt){
+	if(link_path.size() + 1 >= min_step_cnt){
 		return std::make_pair(true, stack_path);
 	}
 	else{

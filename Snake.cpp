@@ -9,34 +9,32 @@ Snake::Snake(std::queue<std::tuple<int, int>> startPosition){
 
 std::queue<std::tuple<int, int>> Snake::nextPosition(std::vector<std::vector<int>> map){
 
-	if(scheduled_steps.empty()){
+	if(scheduled_steps.empty() && backup_steps.empty()){
 
 		//try to find path to fruit
-		//find fruit position
-		auto fruit_positions = find_fruit_positions(map);
-		//try find path to fruit, fruit bigger is better
-		for(auto& fruit_pos : fruit_positions){
-			try{
-				scheduled_steps = shortest_path_finder(head_pos(), fruit_pos, true, map, position, dynamic_is_valid_succesor);
-				//find successful
-				//check wether after eat can survive
-				if(check_path(scheduled_steps, position, map) == false){
-					//clear scheduled path
-					while(!scheduled_steps.empty()){scheduled_steps.pop();}
-					continue;
-				}
+		//find fruit position, return all fruit with biggest at begin()
+		auto fruit_positions = find_fruit_positions(map, position);
+		auto biggest_fruit_iter = fruit_positions.begin();
+		try{
+			scheduled_steps = shortest_path_finder(head_pos(), *biggest_fruit_iter, true, map, position, dynamic_is_valid_succesor, make_low_around_snake_weight_map);
+			//find successful
+			//check wether after eat can survive
+			if(check_path(scheduled_steps, position, map) == false){
+				//clear scheduled path
+				while(!scheduled_steps.empty()){scheduled_steps.pop();}
+			}
+			else{
 				//this scheduled path can use
 				//clear backup steps
 				while(!backup_steps.empty()) backup_steps.pop();
-				break;
-			}catch(std::logic_error e){
-				//not found yet, try again
-				continue;
 			}
+		}
+		catch(std::logic_error e){
+			//not find so do nothing
 		}
 
 		//if not find any path to fruit
-		if(scheduled_steps.empty() && backup_steps.empty()){
+		if(scheduled_steps.empty()){
 			
 			auto v_snake_position = make_vec_snake_position(position);
 			for(int i = 1; i < v_snake_position.size() - 1; i++){
