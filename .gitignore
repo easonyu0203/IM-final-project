@@ -1,7 +1,7 @@
 Final_Project.pdf
 .vscode
-Snake_org.cpp
-Snake_org.h
+Snake.cpp
+Snake.h
 out
 *.zip
 trivial.cpp
