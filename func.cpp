@@ -408,8 +408,8 @@ bool dynamic_is_valid_succesor(const std::tuple<int, int>& successor, const std:
 	if(map[std::get<0>(successor)][std::get<1>(successor)] == -1) return false;
 
 	//check hit itself(dynamic)
-	if(cells_data_map.get_step_count_to_here(parent) + 2 - SAFTY_DISTANCE < v_snake_positions.size()){
-		if(std::find(v_snake_positions.begin() + cells_data_map.get_step_count_to_here(parent) + 2 - SAFTY_DISTANCE, v_snake_positions.end(), successor) != v_snake_positions.end()){
+	if(cells_data_map.get_step_count_to_here(parent) + (2 - SAFTY_DISTANCE) < v_snake_positions.size()){
+		if(std::find(v_snake_positions.begin() + cells_data_map.get_step_count_to_here(parent) +( 2 - SAFTY_DISTANCE), v_snake_positions.end(), successor) != v_snake_positions.end()){
 			return false;
 		}
 	}

@@ -18,15 +18,15 @@
 #include "Snake.h"
 
 //whether cout or not(print map)
-#define COUT 1
+#define COUT 0
 //whether cout result or not
 #define COUT_RESULT 1
 //write result to file or not
-#define WRITE_RESULT_TO_FILE 0
+#define WRITE_RESULT_TO_FILE 1
 //skip map index to 
-#define SKIP_POINT 0
+#define SKIP_POINT 100
 //milli second per frame
-#define milli_sec_per_frame 60
+#define milli_sec_per_frame 30
 
 
 
@@ -362,11 +362,13 @@ int main(int argc, char* argv[])
 			if(cur_map_index == 200){
 				#if WRITE_RESULT_TO_FILE == 1
 				outFile << "win\n";
+				outFile << "score    : " << point << "\n";
 				outFile << "map_index: " << cur_map_index << "\n";
 				outFile << "used step: " << i << "\n\n";
 				#endif
 				#if COUT_RESULT == 1
 				cout << "status   : win\n";
+				cout << "point    : " << point << std::endl;
 				cout << "used step: " << i << std::endl;
 				cout << "map index: " << cur_map_index << std::endl << std::endl;
 				#endif
@@ -399,11 +401,13 @@ int main(int argc, char* argv[])
 	#endif
 	#if COUT_RESULT == 1
 	cout << "status   : lose\n";
+	cout << "point    : " << point << std::endl;
 	cout << "used step: " << i << std::endl;
 	cout << "map index: " << cur_map_index << std::endl << std::endl;
 	#endif
 	#if WRITE_RESULT_TO_FILE == 1
 	outFile << "lose\n";
+	outFile << "score    : " << point << "\n";
 	outFile << "map_index: " << cur_map_index << "\n";
 	outFile << "used step: " << i << "\n\n";
 	#endif
