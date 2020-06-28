@@ -11,7 +11,7 @@
 using namespace std;
 
 const pair<int, int> MAP_SIZE = make_pair(50, 50); // including boundary
-const int NUM_FOOD = 3; // food each round
+const int NUM_FOOD = 2; // food each round
 
 int main()
 {
@@ -85,7 +85,7 @@ int main()
     std::random_device rd;
     std::default_random_engine gen = std::default_random_engine(rd());
     std::uniform_int_distribution<int> dis(1, 48);
-    std::uniform_int_distribution<int> foodScoreDis(1, 10);
+    std::uniform_int_distribution<int> foodScoreDis(1, 2);
 
     string filename = "";
     for (size_t i = 0; i < 100; i++) {
@@ -102,6 +102,7 @@ int main()
         {
             bool success = false;
             pair<int, int> foodPos;
+			bool have_2 = false;
             for (size_t j = 0; j < NUM_FOOD; j++) {
                 success = false;
                 // cout << j << "\n";
@@ -110,7 +111,13 @@ int main()
                     // cout << "try put food at " << foodPos.first << "," << foodPos.second << "\n";
 
                     if (map[foodPos.first][foodPos.second] == 0) {
-                        map[foodPos.first][foodPos.second] = foodScoreDis(gen);
+						if(have_2){
+							map[foodPos.first][foodPos.second] = 1;
+						}
+						else{
+                        	map[foodPos.first][foodPos.second] = 2;
+							have_2 = true;
+						}
                         // cout << "put food at " << foodPos.first << "," << foodPos.second << "\n";
                         success = true;
                     }
