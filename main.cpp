@@ -1,6 +1,7 @@
 ﻿// #define _CRT_SECURE_NO_WARNINGS
 
 #include <cmath>
+#include<fstream>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -15,15 +16,25 @@
 
 #include "Snake.h"
 
-
-#define DEBUG 1
-#define PLAYING true
+//whether cout or not(print map)
+#define COUT 0
+//whether cout result or not
+#define COUT_RESULT 1
+//write result to file or not
+#define WRITE_RESULT_TO_FAIL 1
+//only write win or lose?
+#define STATUS_ONLY 1
+//skip map index to 
 #define SKIP_POINT 201
+//milli second per frame
 #define milli_sec_per_frame 40
 using namespace std;
 
 auto start_t = std::chrono::high_resolution_clock::now();
 auto finish_t = std::chrono::high_resolution_clock::now();
+#if WRITE_RESULT_TO_FAIL
+std::ofstream outFile("testing_data.txt", std::ios::app);
+#endif
 
 const int NUM_MAP = 200;
 
@@ -44,7 +55,9 @@ void loadmaps(vector<vector<int>> map[NUM_MAP + 1])
             fname = to_string(i);
         file.open("map/maps/map_" + fname, ios::in);
         if (!file) {
+			#if COUT == 1
             cout << "no file" << endl;
+			#endif
         } else {
             do {
                 vector<int> tempv;
@@ -264,14 +277,16 @@ int main(int argc, char* argv[])
     int step_limit = 8000;
     int point = 0;
     // cout << get<0>(new_pos.back()) << ", " << get<1>(new_pos.back()) << "|" << point << "\n";
-
-    for (int i = 0; i < step_limit; i++) {
-		#if DEBUG == 1
+	int i = 0;
+    for (; i < step_limit; i++) {
+		#if 1 == 1
 		//output the current state
+		#if COUT == 1
 		std::cout << "current map index: " << cur_map_index << std::endl;
 		std::cout << "current step: " << i << std::endl;
 		std::cout << "point       : " << point << std::endl;
-		if(PLAYING && cur_map_index >= SKIP_POINT){
+		#endif
+		if(true && cur_map_index >= SKIP_POINT){
 
 			finish_t = std::chrono::high_resolution_clock::now();
 			auto past_time = std::chrono::duration_cast<std::chrono::milliseconds>(finish_t - start_t);
@@ -296,13 +311,17 @@ int main(int argc, char* argv[])
         one_step_limit -= abs(get<0>(ori_pos.back()) - new_head_x);
         one_step_limit -= abs(get<1>(ori_pos.back()) - new_head_y);
         if (one_step_limit != 0) {
+			#if COUT == 1
             cout << argv[1] << " A: Invalid step... " << get<0>(new_pos.back()) << ", " << get<1>(new_pos.back()) << "\n";
+			#endif
             break;
         }
 
         // Hit wall
         if (map[new_head_x][new_head_y] == -1) {
+			#if COUT == 1
             cout << argv[1] << " B: GAME OVER! Hit wall... " << get<0>(new_pos.back()) << ", " << get<1>(new_pos.back()) << "\n";
+			#endif
             break;
         }
 
@@ -311,7 +330,9 @@ int main(int argc, char* argv[])
         bool ifGameOver = false;
         for (int i = 0; i < new_pos.size() - 1; i++) {
             if (get<0>(tmp_queue.front()) == new_head_x && get<1>(tmp_queue.front()) == new_head_y) {
+				#if COUT == 1
                 cout << argv[1] << " C: GAME OVER! Hit yourself... " << get<0>(new_pos.back()) << ", " << get<1>(new_pos.back()) << "\n";
+				#endif
                 ifGameOver = true;
                 break;
             }
@@ -325,25 +346,44 @@ int main(int argc, char* argv[])
         // Count point and check eat longer
         if (map[new_head_x][new_head_y] > 0) {
             if (new_pos.size() != ori_pos.size() + 1) {
+				#if COUT == 1
                 cout << argv[1] << " D: Invalid eat length... " << get<0>(new_pos.back()) << ", " << get<1>(new_pos.back()) << "\n";
+				#endif
                 break;
             }
 
             point += map[new_head_x][new_head_y];
-			#if DEBUG  == 1 || DEBUG == 2
+			#if 1  == 1
 			if(cur_map_index == 200){
+				#if WRITE_RESULT_TO_FAIL == 1
+				outFile << "win\n";
+				#if STATUS_ONLY == 0
+				outFile << "used step: " << i << std::endl;
+				outFile << "map index: " << cur_map_index << std::endl << std::endl;
+				#endif
+				#endif
+				#if COUT_RESULT == 1
+				cout << "status   : win\n";
+				cout << "used step: " << i << std::endl;
+				cout << "map index: " << cur_map_index << std::endl << std::endl;
+				#endif
 				//output the current state
+				#if COUT == 1
 				std::cout << "current step: " << i << std::endl;
 				std::cout << "point       : " << point << std::endl;
 				std::cout << "YOU WIN!!!\n";
+				#endif
 				print_game(snake, map);
 				return 0;
 			}
 			#endif
+			
             map = generate_map(whole_map, ++cur_map_index, new_pos);
         } else {
             if (new_pos.size() != ori_pos.size()) {
+				#if COUT == 1
                 cout << argv[1] << " E: Invalid length... " << get<0>(new_pos.back()) << ", " << get<1>(new_pos.back()) << "\n";
+				#endif
                 break;
             }
         }
@@ -351,14 +391,28 @@ int main(int argc, char* argv[])
             break;
         }
     }
+	#if COUT == 1
     cout << argv[1] << " | Final: " << get<0>(new_pos.back()) << ", " << get<1>(new_pos.back()) << "$" << point << "\n";
-
+	#endif
+	#if COUT_RESULT == 1
+	cout << "status   : lose\n";
+	cout << "used step: " << i << std::endl;
+	cout << "map index: " << cur_map_index << std::endl << std::endl;
+	#endif
+	#if WRITE_RESULT_TO_FAIL == 1
+	outFile << "lose\n";
+	#if STATUS_ONLY == 0
+	outFile << "used step: " << i << std::endl;
+	outFile << "map index: " << cur_map_index << std::endl << std::endl;
+	#endif
+	#endif
     // system("pause");
     return 0;
 }
 
 
 void print_game(Snake& snake, const vector<vector<int>>& _map){
+	#if COUT == 1
 	auto map = _map;
 	auto _position = snake.get_position();
 	while(!_position.empty()){
@@ -389,4 +443,5 @@ void print_game(Snake& snake, const vector<vector<int>>& _map){
 		std::cout << std::endl;
 	}
 	std::cout << std::endl;
+	#endif
 }

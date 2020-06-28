@@ -1,3 +1,4 @@
+
 #include <fstream>
 #include<cstring>
 #include <iostream>
@@ -71,7 +72,7 @@ int main()
     for (size_t i = 0; i < 100; i++) {
         vector<vector<int>> map = tempMap;
         filename = "./map/maps/map_" + to_string(i + 101);
-        cout << "writing " << filename << "\n";
+        // cout << "writing " << filename << "\n";
 
         // if (!fp)
         // {
@@ -84,14 +85,14 @@ int main()
             pair<int, int> foodPos;
             for (size_t j = 0; j < NUM_FOOD; j++) {
                 success = false;
-                cout << j << "\n";
+                // cout << j << "\n";
                 while (!success) {
                     foodPos = make_pair(dis(gen), dis(gen));
-                    cout << "try put food at " << foodPos.first << "," << foodPos.second << "\n";
+                    // cout << "try put food at " << foodPos.first << "," << foodPos.second << "\n";
 
                     if (map[foodPos.first][foodPos.second] == 0) {
                         map[foodPos.first][foodPos.second] = foodScoreDis(gen);
-                        cout << "put food at " << foodPos.first << "," << foodPos.second << "\n";
+                        // cout << "put food at " << foodPos.first << "," << foodPos.second << "\n";
                         success = true;
                     }
                 }

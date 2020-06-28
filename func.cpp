@@ -148,6 +148,13 @@ std::tuple<int, int> random_step(const std::vector<std::vector<int>>& map, const
 	auto right_pos = std::make_tuple(std::get<0>(head_pos), std::get<1>(head_pos) + 1);
 	auto down_pos = std::make_tuple(std::get<0>(head_pos) + 1, std::get<1>(head_pos));
 
+	//if the successor is tail then go there
+	if(left_pos == v_snake_positions[1]) return left_pos;
+	if(up_pos == v_snake_positions[1]) return up_pos;
+	if(right_pos == v_snake_positions[1]) return right_pos;
+	if(down_pos == v_snake_positions[1]) return down_pos;
+	
+
 	//don't hit itself and wall as possible
 	if(map[std::get<0>(left_pos)][std::get<1>(left_pos)] >= 0 && std::find(v_snake_positions.begin(), v_snake_positions.end(), left_pos) == v_snake_positions.end()){
 		out = left_pos;

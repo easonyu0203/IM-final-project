@@ -9,7 +9,7 @@ Snake.o: Snake.cpp Snake.h func.cpp
 
 maps:
 	g++ mapGenerate1_100.cpp -std=c++11 -o map1_100
-	g++ mapGenerate101_200.cpp -std=c++11 -o map101_200
+	g++ mapGenerate101_200.cpp -std=c++11 -w -o map101_200
 	./map1_100
 	./map101_200
 
