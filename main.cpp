@@ -44,7 +44,7 @@ std::ofstream outFile("testing_data.txt", std::ios::app);
 
 const int NUM_MAP = 200;
 
-void print_game(Snake& snake, const vector<vector<int>>& _map);
+void print_game(std::queue<std::tuple<int, int>>& snake, const vector<vector<int>>& _map);
 
 void loadmaps(vector<vector<int>> map[NUM_MAP + 1])
 {
@@ -299,7 +299,7 @@ int main(int argc, char* argv[])
 				std::this_thread::sleep_for(std::chrono::milliseconds(milli_sec_per_frame) - past_time);
 			}
 			first = false;
-			print_game(snake, map);
+			print_game(new_pos, map);
 			start_t = std::chrono::high_resolution_clock::now();
 		}
 		#endif
@@ -375,7 +375,7 @@ int main(int argc, char* argv[])
 				std::cout << "point       : " << point << std::endl;
 				std::cout << "YOU WIN!!!\n";
 				#endif
-				print_game(snake, map);
+				print_game(new_pos, map);
 				return 0;
 			}
 			#endif
@@ -410,10 +410,10 @@ int main(int argc, char* argv[])
 }
 
 
-void print_game(Snake& snake, const vector<vector<int>>& _map){
+void print_game(std::queue<std::tuple<int, int>>& pos, const vector<vector<int>>& _map){
 	#if COUT == 1
 	auto map = _map;
-	auto _position = snake.get_position();
+	auto _position = pos;
 	while(!_position.empty()){
 		int x, y;
 		std::tie(x, y) = _position.front();
