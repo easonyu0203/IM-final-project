@@ -17,30 +17,37 @@ std::queue<std::tuple<int, int>> Snake::nextPosition(std::vector<std::vector<int
 		//try find path to fruit, fruit bigger is better
 		for(auto& fruit_pos : fruit_positions){
 			try{
-				scheduled_steps = shortest_path_finder(head_pos(), fruit_pos, map, position, big_head_vision_is_valid_succesor);
+				scheduled_steps = shortest_path_finder(head_pos(), fruit_pos, true, map, position, dynamic_is_valid_succesor);
 				//find successful
 				//clear backup steps
 				while(!backup_steps.empty()) backup_steps.pop();
 				break;
 			}catch(std::logic_error e){
 				//not found yet, try again
+				continue;
 			}
 		}
 
 		//if not find any path to fruit
 		if(scheduled_steps.empty() && backup_steps.empty()){
 			
-			// std::cout << "not find path to fruit!\n"; std::cin.get();
-
-			auto v_snake_positions = make_vec_snake_position(position);
-			//try find longest path to tail, if not then tail-1 and so on
-			for(int i = 1; i < v_snake_positions.size() - 2; i++){
+			auto v_snake_position = make_vec_snake_position(position);
+			for(int i = 1; i < v_snake_position.size() - 1; i++){
 				try{
-					// backup_steps = longest_path_finder(head_pos(), v_snake_positions[i], map, position);
-					//find successful
-					break;
-				}catch(std::logic_error e){
-					//not found yet, try again
+					bool have_bigger_path;
+					std::tie(have_bigger_path, backup_steps) = bigger_path_finder(head_pos(), v_snake_position[i], map, position, i);
+					if(have_bigger_path){
+						//can suvive
+						break;
+					}
+					else{
+						//path not long enough
+						continue;
+					}
+				}
+				catch(std::logic_error e){
+					//didn't find any path, try again
+					continue;
 				}
 			}
 		}
@@ -60,6 +67,11 @@ std::queue<std::tuple<int, int>> Snake::nextPosition(std::vector<std::vector<int
 		}
 	}
 	else if(!backup_steps.empty()){ //try to suvive by taking longest path
+		#if SNAKE_DEBUG == 1
+		std::cout << "using backup path\n";
+		std::cout << "head pos: " <<  std::get<0>(head_pos()) << ", "  << std::get<1>(head_pos()) << "\n";
+		std::cout << "next step: " << std::get<0>(backup_steps.top()) << ", "  << std::get<1>(backup_steps.top()) << "\n";
+		#endif
 		position.push(backup_steps.top());
 		backup_steps.pop();
 		if(map[std::get<0>(position.back())][std::get<1>(position.back())] == 0) position.pop();

@@ -19,7 +19,7 @@
 #define DEBUG 1
 #define PLAYING true
 #define SKIP_POINT 201
-#define milli_sec_per_frame 30
+#define milli_sec_per_frame 40
 using namespace std;
 
 auto start_t = std::chrono::high_resolution_clock::now();
