@@ -4,7 +4,7 @@ main: main.o Snake.o
 main.o: main.cpp
 	g++ -c main.cpp -std=c++11 -o main.o
 
-Snake.o: Snake.cpp Snake.h func.cpp
+Snake.o: Snake.cpp Snake.h
 	g++ -c Snake.cpp -std=c++11 -o Snake.o
 
 maps:

@@ -18,7 +18,7 @@
 #include "Snake.h"
 
 //whether cout or not(print map)
-#define COUT 0
+#define COUT 1
 //whether cout result or not
 #define COUT_RESULT 1
 //write result to file or not
