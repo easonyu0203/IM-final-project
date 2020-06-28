@@ -23,9 +23,9 @@
 //write result to file or not
 #define WRITE_RESULT_TO_FILE 0
 //skip map index to 
-#define SKIP_POINT 201
+#define SKIP_POINT 100
 //milli second per frame
-#define milli_sec_per_frame 60
+#define milli_sec_per_frame 30
 
 
 
@@ -44,7 +44,7 @@ std::ofstream outFile("testing_data.txt", std::ios::app);
 
 const int NUM_MAP = 200;
 
-void print_game(std::queue<std::tuple<int, int>>& snake, const vector<vector<int>>& _map);
+void print_game(Snake& snake, const vector<vector<int>>& _map);
 
 void loadmaps(vector<vector<int>> map[NUM_MAP + 1])
 {
@@ -299,7 +299,7 @@ int main(int argc, char* argv[])
 				std::this_thread::sleep_for(std::chrono::milliseconds(milli_sec_per_frame) - past_time);
 			}
 			first = false;
-			print_game(new_pos, map);
+			print_game(snake, map);
 			start_t = std::chrono::high_resolution_clock::now();
 		}
 		#endif
@@ -361,11 +361,13 @@ int main(int argc, char* argv[])
 			if(cur_map_index == 200){
 				#if WRITE_RESULT_TO_FILE == 1
 				outFile << "win\n";
+				outFile << "score    : " << point << "\n";
 				outFile << "map_index: " << cur_map_index << "\n";
 				outFile << "used step: " << i << "\n\n";
 				#endif
 				#if COUT_RESULT == 1
 				cout << "status   : win\n";
+				cout << "point    : " << point << std::endl;
 				cout << "used step: " << i << std::endl;
 				cout << "map index: " << cur_map_index << std::endl << std::endl;
 				#endif
@@ -375,7 +377,7 @@ int main(int argc, char* argv[])
 				std::cout << "point       : " << point << std::endl;
 				std::cout << "YOU WIN!!!\n";
 				#endif
-				print_game(new_pos, map);
+				print_game(snake, map);
 				return 0;
 			}
 			#endif
@@ -398,11 +400,13 @@ int main(int argc, char* argv[])
 	#endif
 	#if COUT_RESULT == 1
 	cout << "status   : lose\n";
+	cout << "point    : " << point << std::endl;
 	cout << "used step: " << i << std::endl;
 	cout << "map index: " << cur_map_index << std::endl << std::endl;
 	#endif
 	#if WRITE_RESULT_TO_FILE == 1
 	outFile << "lose\n";
+	outFile << "score    : " << point << "\n";
 	outFile << "map_index: " << cur_map_index << "\n";
 	outFile << "used step: " << i << "\n\n";
 	#endif
@@ -410,10 +414,10 @@ int main(int argc, char* argv[])
 }
 
 
-void print_game(std::queue<std::tuple<int, int>>& pos, const vector<vector<int>>& _map){
+void print_game(Snake& snake, const vector<vector<int>>& _map){
 	#if COUT == 1
 	auto map = _map;
-	auto _position = pos;
+	auto _position = snake.get_position();
 	while(!_position.empty()){
 		int x, y;
 		std::tie(x, y) = _position.front();
