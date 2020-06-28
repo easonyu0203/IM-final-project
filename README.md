@@ -12,7 +12,7 @@ First, open terminal and change directory to here, and make sure you have Snake.
 input following to terminal<br>
 + `make main`: produce executable file `main`
 + `make maps`: produce random 200 maps
-+ `make play`: produce `main` and random 200 maps and exicute automatically
++ `make play`: produce `main` and random 200 maps and execute automatically
 + `make clean`: clean all executable file
 
 ## Main.cpp Macro
@@ -39,5 +39,5 @@ This might consume a lot of time!!!
 ...This is a little bit hard to explain^^ and I don't have time :P
 
 ## Very Helpful People
-Thank Timicienio for random map generator<br>
-Thank Brian Chen for READ.md format and visualization<br>
+Thank Timicienio random map generator<br>
+Thank Brian Chen READ.md format and visualization<br>
