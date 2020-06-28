@@ -18,17 +18,20 @@
 #include "Snake.h"
 
 //whether cout or not(print map)
-#define COUT 1
+#define COUT 0
 //whether cout result or not
-#define COUT_RESULT 0
+#define COUT_RESULT 1
 //write result to file or not
-#define WRITE_RESULT_TO_FILE 0
-//only write win or lose?
-#define STATUS_ONLY 0
+#define WRITE_RESULT_TO_FILE 1
 //skip map index to 
 #define SKIP_POINT 201
 //milli second per frame
 #define milli_sec_per_frame 60
+
+
+
+
+
 using namespace std;
 #define RED "\033[31m" /* Red */
 #define BLUE "\033[34m" /* Blue */
@@ -283,14 +286,12 @@ int main(int argc, char* argv[])
     // cout << get<0>(new_pos.back()) << ", " << get<1>(new_pos.back()) << "|" << point << "\n";
 	int i = 0;
     for (; i < step_limit; i++) {
-		#if 1 == 1
 		//output the current state
 		#if COUT == 1
 		std::cout << "current map index: " << cur_map_index << std::endl;
 		std::cout << "current step: " << i << std::endl;
 		std::cout << "point       : " << point << std::endl;
-		#endif
-		if(true && cur_map_index >= SKIP_POINT){
+		if(cur_map_index >= SKIP_POINT){
 
 			finish_t = std::chrono::high_resolution_clock::now();
 			auto past_time = std::chrono::duration_cast<std::chrono::milliseconds>(finish_t - start_t);
@@ -361,10 +362,8 @@ int main(int argc, char* argv[])
 			if(cur_map_index == 200){
 				#if WRITE_RESULT_TO_FILE == 1
 				outFile << "win\n";
-				#if STATUS_ONLY == 0
-				outFile << "used step: " << i << std::endl;
-				outFile << "map index: " << cur_map_index << std::endl << std::endl;
-				#endif
+				outFile << "map_index: " << cur_map_index << "\n";
+				outFile << "used step: " << i << "\n\n";
 				#endif
 				#if COUT_RESULT == 1
 				cout << "status   : win\n";
@@ -405,12 +404,9 @@ int main(int argc, char* argv[])
 	#endif
 	#if WRITE_RESULT_TO_FILE == 1
 	outFile << "lose\n";
-	#if STATUS_ONLY == 0
-	outFile << "used step: " << i << std::endl;
-	outFile << "map index: " << cur_map_index << std::endl << std::endl;
+	outFile << "map_index: " << cur_map_index << "\n";
+	outFile << "used step: " << i << "\n\n";
 	#endif
-	#endif
-    // system("pause");
     return 0;
 }
 

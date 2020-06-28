@@ -5,10 +5,16 @@ int main(){
 
 	std::ifstream in("testing_data.txt");
 	int win = 0, lose = 0;
+	int indexCnt = 0;
 	std::string str;
 	while(in >> str){
 		if(str == "win") win++;
 		else if(str == "lose") lose++;
+		else if(str == "map_index:"){
+			int tmpCnt;
+			in >> tmpCnt;
+			indexCnt += tmpCnt;
+		}
 		else continue;
 	}
 	in.close();
@@ -18,6 +24,7 @@ int main(){
 	out << "total win  : " << win << std::endl;
 	out << "total lose : " << lose << std::endl;
 	out << "win rate   : " << float(win) / float(win+lose) << std::endl;
+	out << "avg map num: " << float(indexCnt) / float(win + lose) << std::endl;
 	out << "================================================\n";
 
 	return 0;
