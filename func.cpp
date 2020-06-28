@@ -530,3 +530,37 @@ std::pair<bool, std::stack<std::tuple<int, int>>> bigger_path_finder(const std::
 	}
 
 }
+
+//if after the snake eat the fruit, it can have a bigger path to one of it body
+//that mean the snake can escape
+bool check_path(const std::stack<std::tuple<int, int>>& c_scheduled_path, const std::queue<std::tuple<int, int>>& q_snake_position, const std::vector<std::vector<int>>& map){
+
+	//make a virtual snake that is the position when eat fruit
+	auto q_virtual_snake = q_snake_position;
+	auto scheduled_path = c_scheduled_path;
+	while(!scheduled_path.empty()){
+		q_virtual_snake.push(scheduled_path.top());
+		scheduled_path.pop();
+		q_virtual_snake.pop();
+	}
+
+	//check can escape
+	auto v_virtual_snake = make_vec_snake_position(q_virtual_snake);
+	bool can_escape = false;
+	std::stack<std::tuple<int, int>> dummy_path;
+	for(int i = 1; i < v_virtual_snake.size() - 2; i++){
+		try{
+			std::tie(can_escape, dummy_path) = bigger_path_finder(v_virtual_snake.back(), v_virtual_snake[i], map, q_virtual_snake, i+1);
+			if(can_escape){
+				//can escape
+				return true;
+			}
+		}
+		catch(std::logic_error e){
+			continue;
+		}
+	}
+
+	//all body point can't escape
+	return false;
+}

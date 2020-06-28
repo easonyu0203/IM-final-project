@@ -1,7 +1,8 @@
 #!/bin/bash
 
 #give the result of 10 play
-for i in {1..1000}
+rm -f testing_data.txt
+for i in {1..100}
 do 
 	echo "testing $i"
 	make play

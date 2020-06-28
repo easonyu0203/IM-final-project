@@ -21,18 +21,18 @@
 //whether cout result or not
 #define COUT_RESULT 1
 //write result to file or not
-#define WRITE_RESULT_TO_FAIL 1
+#define WRITE_RESULT_TO_FILE 1
 //only write win or lose?
-#define STATUS_ONLY 1
+#define STATUS_ONLY 0
 //skip map index to 
 #define SKIP_POINT 201
 //milli second per frame
-#define milli_sec_per_frame 40
+#define milli_sec_per_frame 60
 using namespace std;
 
 auto start_t = std::chrono::high_resolution_clock::now();
 auto finish_t = std::chrono::high_resolution_clock::now();
-#if WRITE_RESULT_TO_FAIL
+#if WRITE_RESULT_TO_FILE
 std::ofstream outFile("testing_data.txt", std::ios::app);
 #endif
 
@@ -355,7 +355,7 @@ int main(int argc, char* argv[])
             point += map[new_head_x][new_head_y];
 			#if 1  == 1
 			if(cur_map_index == 200){
-				#if WRITE_RESULT_TO_FAIL == 1
+				#if WRITE_RESULT_TO_FILE == 1
 				outFile << "win\n";
 				#if STATUS_ONLY == 0
 				outFile << "used step: " << i << std::endl;
@@ -399,7 +399,7 @@ int main(int argc, char* argv[])
 	cout << "used step: " << i << std::endl;
 	cout << "map index: " << cur_map_index << std::endl << std::endl;
 	#endif
-	#if WRITE_RESULT_TO_FAIL == 1
+	#if WRITE_RESULT_TO_FILE == 1
 	outFile << "lose\n";
 	#if STATUS_ONLY == 0
 	outFile << "used step: " << i << std::endl;

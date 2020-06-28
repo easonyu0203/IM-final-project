@@ -19,6 +19,13 @@ std::queue<std::tuple<int, int>> Snake::nextPosition(std::vector<std::vector<int
 			try{
 				scheduled_steps = shortest_path_finder(head_pos(), fruit_pos, true, map, position, dynamic_is_valid_succesor);
 				//find successful
+				//check wether after eat can survive
+				if(check_path(scheduled_steps, position, map) == false){
+					//clear scheduled path
+					while(!scheduled_steps.empty()){scheduled_steps.pop();}
+					continue;
+				}
+				//this scheduled path can use
 				//clear backup steps
 				while(!backup_steps.empty()) backup_steps.pop();
 				break;
@@ -35,7 +42,7 @@ std::queue<std::tuple<int, int>> Snake::nextPosition(std::vector<std::vector<int
 			for(int i = 1; i < v_snake_position.size() - 1; i++){
 				try{
 					bool have_bigger_path;
-					std::tie(have_bigger_path, backup_steps) = bigger_path_finder(head_pos(), v_snake_position[i], map, position, i);
+					std::tie(have_bigger_path, backup_steps) = bigger_path_finder(head_pos(), v_snake_position[i], map, position, i + 1);
 					if(have_bigger_path){
 						//can suvive
 						break;
