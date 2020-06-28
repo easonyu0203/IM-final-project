@@ -39,5 +39,5 @@ This might consume a lot of time!!!
 ...This is a little bit hard to explain^^ and I don't have time :P
 
 ## Very Helpful People
-Thank for Timicienio for random map generator<br>
-Thank for Brian Chen for READ.md format and visualization<br>
+Thank Timicienio for random map generator<br>
+Thank Brian Chen for READ.md format and visualization<br>
