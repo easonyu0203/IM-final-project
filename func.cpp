@@ -304,6 +304,12 @@ std::vector<std::vector<int>> make_low_around_snake_weight_map(const std::vector
 		weight_map[std::get<0>(v_snake_posistions[i])][std::get<1>(v_snake_posistions[i])] = LOW_IN_SNAKE_WEIGHT;
 	}
 
+	//un wanted fruit
+	for(int i = 0; i < map.size(); i++)
+		for(int j = 0; j < map.size(); j++){
+			if(map[i][j] == UN_FRUIT) weight_map[i][j] = UN_FRUIT_WEIGHT;
+		}
+
 	//draw wall
 	for(int i = 0; i < map.size(); i++)
 		for(int j = 0; j < map.size(); j++){
@@ -431,7 +437,7 @@ bool static_is_valid_successor(const std::tuple<int, int>& successor, const std:
 	const std::vector<std::vector<int>>& map, const std::vector<std::tuple<int, int>>& v_snake_positions, const Cells_map& cells_data_map){
 	
 	//hit wall
-	if(map[std::get<0>(successor)][std::get<1>(successor)] < 0) return false;
+	if(map[std::get<0>(successor)][std::get<1>(successor)] == -1) return false;
 	//ht itself
 	if(std::find(v_snake_positions.begin() + 1, v_snake_positions.end(), successor) != v_snake_positions.end()) return false;
 	//safe

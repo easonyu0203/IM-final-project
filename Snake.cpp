@@ -3,6 +3,8 @@
 
 #define SNAKE_DEBUG 0
 
+
+
 Snake::Snake(std::queue<std::tuple<int, int>> startPosition){
 	position = startPosition;
 }
@@ -20,7 +22,7 @@ std::queue<std::tuple<int, int>> Snake::nextPosition(std::vector<std::vector<int
 		//turn !biggest fruit to wall
 		if(fruit_positions.size() > 1){
 			for(int i = 1; i < fruit_positions.size(); i++){
-				map[std::get<0>(fruit_positions[i])][std::get<1>(fruit_positions[i])] = -1;
+				map[std::get<0>(fruit_positions[i])][std::get<1>(fruit_positions[i])] = UN_FRUIT;
 			}
 		}
 

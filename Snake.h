@@ -10,6 +10,8 @@
 #include<iostream>
 #include<exception>
 
+#define UN_FRUIT 10
+#define UN_FRUIT_WEIGHT 10000000
 
 class Snake {
 private:

@@ -11,7 +11,7 @@
 using namespace std;
 
 const pair<int, int> MAP_SIZE = make_pair(50, 50); // including boundary
-const int NUM_FOOD = 2; // food each round
+const int NUM_FOOD = 3; // food each round
 
 int main()
 {
@@ -111,8 +111,9 @@ int main()
                     // cout << "try put food at " << foodPos.first << "," << foodPos.second << "\n";
 
                     if (map[foodPos.first][foodPos.second] == 0) {
+						// map[foodPos.first][foodPos.second] = rand()%2 + 1;
 						if(have_2){
-							map[foodPos.first][foodPos.second] = 1;
+							map[foodPos.first][foodPos.second] = rand()%2 + 1;
 						}
 						else{
                         	map[foodPos.first][foodPos.second] = 2;

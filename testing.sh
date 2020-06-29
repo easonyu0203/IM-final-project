@@ -2,6 +2,7 @@
 
 #give the result of 10 play
 rm -f testing_data.txt
+make clean
 for i in {1..100}
 do 
 	echo "testing $i"
