@@ -113,7 +113,7 @@ int main()
                     if (map[foodPos.first][foodPos.second] == 0) {
 						// map[foodPos.first][foodPos.second] = rand()%2 + 1;
 						if(have_2){
-							map[foodPos.first][foodPos.second] = rand()%2 + 1;
+							map[foodPos.first][foodPos.second] = 1;
 						}
 						else{
                         	map[foodPos.first][foodPos.second] = 2;

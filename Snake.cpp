@@ -16,38 +16,51 @@ std::queue<std::tuple<int, int>> Snake::nextPosition(std::vector<std::vector<int
 		//try to find path to fruit
 		//find fruit position, return all fruit with biggest at begin()
 		auto fruit_positions = find_fruit_positions(map, position);
-		auto biggest_fruit_iter = fruit_positions.begin();
-		bool find_short_path = false;
 
-
+		//find end() of biggest fruits
+		int biggest_fruits_end = 0;
+		for(int i = 0; i + 1 < fruit_positions.size(); i++){
+			if(map[std::get<0>(fruit_positions[i])][std::get<1>(fruit_positions[i])] == map[std::get<0>(fruit_positions[i+1])][std::get<1>(fruit_positions[i+1])]){
+				biggest_fruits_end = i + 1;
+			}
+			else{break;}
+		}
+		biggest_fruits_end++;
 
 		//turn !biggest fruit to wall
-		if(fruit_positions.size() > 1){
-			for(int i = 1; i < fruit_positions.size(); i++){
+		if(fruit_positions.size() > biggest_fruits_end){
+			for(int i = biggest_fruits_end; i < fruit_positions.size(); i++){
 				map[std::get<0>(fruit_positions[i])][std::get<1>(fruit_positions[i])] = UN_FRUIT;
 			}
 		}
 
+		std::stack<std::tuple<int, int>> tmp_path;
+		for(int i = 0; i < biggest_fruits_end; i++){
+			try{
+				tmp_path = shortest_path_finder(head_pos(), fruit_positions[i], true, map, position, dynamic_is_valid_succesor, make_low_around_snake_weight_map);
+				//find successful
+				//check wether after eat can survive
+				if(check_path(tmp_path, position, map) == false){
+					//clear scheduled path
+					while(!tmp_path.empty()){tmp_path.pop();}
+					continue;
+				}
+				else{
+					//this scheduled path can use
+					if(scheduled_steps.empty() || tmp_path.size() < scheduled_steps.size()){
+						scheduled_steps = tmp_path;
+						//clear backup steps
+						while(!backup_steps.empty()) backup_steps.pop();
+						continue;
+					}
+				}
+			}
+			catch(std::logic_error e){
+				//do nothing
+			}
 
-		//use low around snake weight map to find short path
-		try{
-			scheduled_steps = shortest_path_finder(head_pos(), *biggest_fruit_iter, true, map, position, dynamic_is_valid_succesor, make_low_around_snake_weight_map);
-			//find successful
-			//check wether after eat can survive
-			if(check_path(scheduled_steps, position, map) == false){
-				//clear scheduled path
-				while(!scheduled_steps.empty()){scheduled_steps.pop();}
-			}
-			else{
-				//this scheduled path can use
-				//clear backup steps
-				find_short_path = true;
-				while(!backup_steps.empty()) backup_steps.pop();
-			}
 		}
-		catch(std::logic_error e){
-			//not find so do nothing
-		}
+
 		
 		//if not find any path to fruit
 		if(scheduled_steps.empty()){
