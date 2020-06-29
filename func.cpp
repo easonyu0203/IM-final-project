@@ -15,10 +15,13 @@
 #include"Snake.h"
 
 #define MIN_HEAD_VISION_PERCENT 80
-#define BASIC_WEIGHT 128
-#define AROUND_SNAKE_WEIGHT 99
+#define BASIC_WEIGHT 100
+#define LOW_AROUND_SNAKE_WEIGHT 99
+#define LOW_IN_SNAKE_WEIGHT 98
+#define HIGH_AROUND_SNAKE_WEIGHT 101
+#define HIGH_IN_SNAKE_WEIGHT 102
+
 #define SAFTY_DISTANCE 2
-#define IN_SNAKE_WEIGHT 98
 
 #define FUNC_DEBUG 0
 
@@ -181,6 +184,100 @@ std::tuple<int, int> random_step(const std::vector<std::vector<int>>& map, const
 std::vector<std::tuple<int, int>> get_successors_positions(const std::tuple<int, int> target);
 
 //return vec<vec<int>> wieght map that take in consideration of snake position
+std::vector<std::vector<int>> make_high_around_snake_weight_map(const std::vector<std::vector<int>>& map, const std::vector<std::tuple<int, int>>& v_snake_posistions){
+	std::vector<std::vector<int>> weight_map;
+	weight_map = map;
+	
+	//point that >= 0, empty spot and fruit spot
+	for(auto& row : weight_map)
+		for(int& v : row)
+			if(v >= 0) v = BASIC_WEIGHT;
+	
+	//draw around snake
+	weight_map[std::get<0>(v_snake_posistions.back()) - 1][std::get<1>(v_snake_posistions.back()) - 1] = HIGH_AROUND_SNAKE_WEIGHT;
+	weight_map[std::get<0>(v_snake_posistions.back()) + 1][std::get<1>(v_snake_posistions.back()) + 1] = HIGH_AROUND_SNAKE_WEIGHT;
+	weight_map[std::get<0>(v_snake_posistions.back()) - 1][std::get<1>(v_snake_posistions.back()) + 1] = HIGH_AROUND_SNAKE_WEIGHT;
+	weight_map[std::get<0>(v_snake_posistions.back()) + 1][std::get<1>(v_snake_posistions.back()) - 1] = HIGH_AROUND_SNAKE_WEIGHT;
+	for(int i = 1; i < v_snake_posistions.size(); i++){
+		auto successors_positions = get_successors_positions(v_snake_posistions[i]);
+		for(auto& successor : successors_positions){
+			weight_map[std::get<0>(successor)][std::get<1>(successor)] = HIGH_AROUND_SNAKE_WEIGHT;
+		}
+	}
+	
+	//draw inside snake
+	for(int i = 1; i < v_snake_posistions.size(); i++){
+		weight_map[std::get<0>(v_snake_posistions[i])][std::get<1>(v_snake_posistions[i])] = HIGH_IN_SNAKE_WEIGHT;
+	}
+
+	//draw wall
+	for(int i = 0; i < map.size(); i++)
+		for(int j = 0; j < map.size(); j++){
+			if(map[i][j] == -1) weight_map[i][j] = INT32_MAX;
+		}
+	
+	#if FUNC_DEBUG == 1
+	for(int i = 0; i < map.size(); i++){
+		for(int j = 0; j < map.size(); j++){
+			if(weight_map[i][j] != INT32_MAX) std::cout << std::setw(3) << weight_map[i][j] << " ";
+			else std::cout << "max ";
+		}
+		std::cout << std::endl;
+	}
+	std::cin.get();
+	#endif
+
+	return weight_map;
+}
+
+//return vec<vec<int>> wieght map that take in consideration of snake position
+std::vector<std::vector<int>> make_basic_weight_map(const std::vector<std::vector<int>>& map, const std::vector<std::tuple<int, int>>& v_snake_posistions){
+	std::vector<std::vector<int>> weight_map;
+	weight_map = map;
+	
+	//point that >= 0, empty spot and fruit spot
+	for(auto& row : weight_map)
+		for(int& v : row)
+			if(v >= 0) v = BASIC_WEIGHT;
+	
+	//draw around snake
+	weight_map[std::get<0>(v_snake_posistions.back()) - 1][std::get<1>(v_snake_posistions.back()) - 1] = BASIC_WEIGHT;
+	weight_map[std::get<0>(v_snake_posistions.back()) + 1][std::get<1>(v_snake_posistions.back()) + 1] = BASIC_WEIGHT;
+	weight_map[std::get<0>(v_snake_posistions.back()) - 1][std::get<1>(v_snake_posistions.back()) + 1] = BASIC_WEIGHT;
+	weight_map[std::get<0>(v_snake_posistions.back()) + 1][std::get<1>(v_snake_posistions.back()) - 1] = BASIC_WEIGHT;
+	for(int i = 1; i < v_snake_posistions.size(); i++){
+		auto successors_positions = get_successors_positions(v_snake_posistions[i]);
+		for(auto& successor : successors_positions){
+			weight_map[std::get<0>(successor)][std::get<1>(successor)] = BASIC_WEIGHT;
+		}
+	}
+	
+	//draw inside snake
+	for(int i = 1; i < v_snake_posistions.size(); i++){
+		weight_map[std::get<0>(v_snake_posistions[i])][std::get<1>(v_snake_posistions[i])] = BASIC_WEIGHT;
+	}
+
+	//draw wall
+	for(int i = 0; i < map.size(); i++)
+		for(int j = 0; j < map.size(); j++){
+			if(map[i][j] == -1) weight_map[i][j] = INT32_MAX;
+		}
+	
+	#if FUNC_DEBUG == 1
+	for(int i = 0; i < map.size(); i++){
+		for(int j = 0; j < map.size(); j++){
+			if(weight_map[i][j] != INT32_MAX) std::cout << std::setw(3) << weight_map[i][j] << " ";
+			else std::cout << "max ";
+		}
+		std::cout << std::endl;
+	}
+	std::cin.get();
+	#endif
+
+	return weight_map;
+}
+
+//return vec<vec<int>> wieght map that take in consideration of snake position
 std::vector<std::vector<int>> make_low_around_snake_weight_map(const std::vector<std::vector<int>>& map, const std::vector<std::tuple<int, int>>& v_snake_posistions){
 	std::vector<std::vector<int>> weight_map;
 	weight_map = map;
@@ -191,20 +288,20 @@ std::vector<std::vector<int>> make_low_around_snake_weight_map(const std::vector
 			if(v >= 0) v = BASIC_WEIGHT;
 	
 	//draw around snake
-	weight_map[std::get<0>(v_snake_posistions.back()) - 1][std::get<1>(v_snake_posistions.back()) - 1] = AROUND_SNAKE_WEIGHT;
-	weight_map[std::get<0>(v_snake_posistions.back()) + 1][std::get<1>(v_snake_posistions.back()) + 1] = AROUND_SNAKE_WEIGHT;
-	weight_map[std::get<0>(v_snake_posistions.back()) - 1][std::get<1>(v_snake_posistions.back()) + 1] = AROUND_SNAKE_WEIGHT;
-	weight_map[std::get<0>(v_snake_posistions.back()) + 1][std::get<1>(v_snake_posistions.back()) - 1] = AROUND_SNAKE_WEIGHT;
+	weight_map[std::get<0>(v_snake_posistions.back()) - 1][std::get<1>(v_snake_posistions.back()) - 1] = LOW_AROUND_SNAKE_WEIGHT;
+	weight_map[std::get<0>(v_snake_posistions.back()) + 1][std::get<1>(v_snake_posistions.back()) + 1] = LOW_AROUND_SNAKE_WEIGHT;
+	weight_map[std::get<0>(v_snake_posistions.back()) - 1][std::get<1>(v_snake_posistions.back()) + 1] = LOW_AROUND_SNAKE_WEIGHT;
+	weight_map[std::get<0>(v_snake_posistions.back()) + 1][std::get<1>(v_snake_posistions.back()) - 1] = LOW_AROUND_SNAKE_WEIGHT;
 	for(int i = 1; i < v_snake_posistions.size(); i++){
 		auto successors_positions = get_successors_positions(v_snake_posistions[i]);
 		for(auto& successor : successors_positions){
-			weight_map[std::get<0>(successor)][std::get<1>(successor)] = AROUND_SNAKE_WEIGHT;
+			weight_map[std::get<0>(successor)][std::get<1>(successor)] = LOW_AROUND_SNAKE_WEIGHT;
 		}
 	}
 	
 	//draw inside snake
 	for(int i = 1; i < v_snake_posistions.size(); i++){
-		weight_map[std::get<0>(v_snake_posistions[i])][std::get<1>(v_snake_posistions[i])] = IN_SNAKE_WEIGHT;
+		weight_map[std::get<0>(v_snake_posistions[i])][std::get<1>(v_snake_posistions[i])] = LOW_IN_SNAKE_WEIGHT;
 	}
 
 	//draw wall

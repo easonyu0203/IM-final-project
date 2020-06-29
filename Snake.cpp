@@ -15,6 +15,9 @@ std::queue<std::tuple<int, int>> Snake::nextPosition(std::vector<std::vector<int
 		//find fruit position, return all fruit with biggest at begin()
 		auto fruit_positions = find_fruit_positions(map, position);
 		auto biggest_fruit_iter = fruit_positions.begin();
+		bool find_short_path = false;
+
+		//use low around snake weight map to find short path
 		try{
 			scheduled_steps = shortest_path_finder(head_pos(), *biggest_fruit_iter, true, map, position, dynamic_is_valid_succesor, make_low_around_snake_weight_map);
 			//find successful
@@ -26,13 +29,14 @@ std::queue<std::tuple<int, int>> Snake::nextPosition(std::vector<std::vector<int
 			else{
 				//this scheduled path can use
 				//clear backup steps
+				find_short_path = true;
 				while(!backup_steps.empty()) backup_steps.pop();
 			}
 		}
 		catch(std::logic_error e){
 			//not find so do nothing
 		}
-
+		
 		//if not find any path to fruit
 		if(scheduled_steps.empty()){
 			

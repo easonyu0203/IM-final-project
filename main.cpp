@@ -22,9 +22,9 @@
 //whether cout result or not
 #define COUT_RESULT 1
 //write result to file or not
-#define WRITE_RESULT_TO_FILE 1
+#define WRITE_RESULT_TO_FILE 0
 //skip map index to 
-#define SKIP_POINT 160
+#define SKIP_POINT 110
 //milli second per frame
 #define milli_sec_per_frame 50
 
@@ -35,6 +35,7 @@
 using namespace std;
 #define RED "\033[31m" /* Red */
 #define BLUE "\033[34m" /* Blue */
+#define BOLDBLACK "\033[1m\033[30m" /* Bold Black */
 #define RESET "\033[0m"
 
 auto start_t = std::chrono::high_resolution_clock::now();
@@ -430,7 +431,7 @@ void print_game(Snake& snake, const vector<vector<int>>& _map){
 			if(map[i][j] == -10){
 				if(snake.head_pos() == make_tuple(i, j)) std::cout << RED << "X " << RESET;
 				else if(snake.tail_pos() == make_tuple(i, j)) std::cout << BLUE << "X " << RESET;
-				else std::cout << "X ";
+				else std::cout << BOLDBLACK << "X " << RESET;
 			}
 			else if(map[i][j] == -1){
 				std::cout << "* ";
