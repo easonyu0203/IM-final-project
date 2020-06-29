@@ -2,7 +2,7 @@
 
 #give the result of 10 play
 rm -f testing_data.txt
-for i in {1..10}
+for i in {1..100}
 do 
 	echo "testing $i"
 	make play

@@ -17,6 +17,14 @@ std::queue<std::tuple<int, int>> Snake::nextPosition(std::vector<std::vector<int
 		auto biggest_fruit_iter = fruit_positions.begin();
 		bool find_short_path = false;
 
+		//turn !biggest fruit to wall
+		if(fruit_positions.size() > 1){
+			for(int i = 1; i < fruit_positions.size(); i++){
+				map[std::get<0>(fruit_positions[i])][std::get<1>(fruit_positions[i])] = -1;
+			}
+		}
+
+
 		//use low around snake weight map to find short path
 		try{
 			scheduled_steps = shortest_path_finder(head_pos(), *biggest_fruit_iter, true, map, position, dynamic_is_valid_succesor, make_low_around_snake_weight_map);
