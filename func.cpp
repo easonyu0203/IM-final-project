@@ -315,17 +315,6 @@ std::vector<std::vector<int>> make_low_around_snake_weight_map(const std::vector
 		for(int j = 0; j < map.size(); j++){
 			if(map[i][j] == -1) weight_map[i][j] = INT32_MAX;
 		}
-	
-	#if FUNC_DEBUG == 1
-	for(int i = 0; i < map.size(); i++){
-		for(int j = 0; j < map.size(); j++){
-			if(weight_map[i][j] != INT32_MAX) std::cout << std::setw(3) << weight_map[i][j] << " ";
-			else std::cout << "max ";
-		}
-		std::cout << std::endl;
-	}
-	std::cin.get();
-	#endif
 
 	return weight_map;
 }
@@ -373,21 +362,11 @@ std::stack<std::tuple<int, int>> shortest_path_finder(const std::tuple<int, int>
 		auto examing_point_iter = std::min_element(open_list.begin(), open_list.end(), [&cells_data_map](std::tuple<int, int> a, std::tuple<int, int>b){
 			if(cells_data_map.get_total_estimate_cost(a) < cells_data_map.get_total_estimate_cost(b)) return true;
 			if(cells_data_map.get_total_estimate_cost(a) > cells_data_map.get_total_estimate_cost(b)) return false;
-			return a > b;
+			return a < b;
 		});
 		auto examing_point = *examing_point_iter;
 		open_list.erase(examing_point_iter);
 		closed_list.insert(examing_point);
-		#if FUNC_DEBUG == 1
-		std::cout << "pull " << std::get<0>(examing_point) << ", " << std::get<1>(examing_point) << " from open and insert to closed\n";
-		std::cout << "real coust: " << cells_data_map.get_real_cost(examing_point) <<std::endl;
-		std::cout << "heuristic coust: " << cells_data_map.get_heuristic_cost(examing_point) <<std::endl;
-		std::cout << "total coust: " << cells_data_map.get_total_estimate_cost(examing_point) <<std::endl;
-		std::cout << "open list:\n";
-		for(auto tuple : open_list){
-			std::cout << "(" << std::get<0>(tuple) << ", " << std::get<1>(tuple) << ") cost: " << cells_data_map.get_total_estimate_cost(tuple) << std::endl;
-		}
-		#endif
 
 		//check this point successor and update their status
 		auto successors_positions = get_successors_positions(examing_point);
@@ -523,24 +502,6 @@ bool dynamic_is_valid_succesor(const std::tuple<int, int>& successor, const std:
 		if(std::find(v_snake_positions.begin() + cells_data_map.get_step_count_to_here(parent) +( 2 - SAFTY_DISTANCE), v_snake_positions.end(), successor) != v_snake_positions.end()){
 			return false;
 		}
-	}
-	
-	// check vision 
-	//get arounding position
-	std::tuple<int, int> forward_pos = make_forward_position(successor, parent);
-	std::tuple<int, int> a_side_pos, b_side_pos;
-	std::tie(a_side_pos, b_side_pos) = make_side_position(successor, parent);
-	auto fruit_pos = cells_data_map.des;
-
-	static int cnt = 0;
-	//if forward pos is wall or snake, need to check vision
-	if(map[std::get<0>(forward_pos)][std::get<1>(forward_pos)] == -1 ||\
-	(cells_data_map.get_step_count_to_here(parent) + 3 < v_snake_positions.size() && std::find(v_snake_positions.begin() + cells_data_map.get_step_count_to_here(parent) + 3, v_snake_positions.end(), forward_pos) != v_snake_positions.end()) ){
-
-		cnt++;
-		// std::cout << "count of need check vision: " << cnt << std::endl;
-
-		
 	}
 	
 	return true;

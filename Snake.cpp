@@ -101,11 +101,6 @@ std::queue<std::tuple<int, int>> Snake::nextPosition(std::vector<std::vector<int
 		}
 	}
 	else if(!backup_steps.empty()){ //try to suvive by taking longest path
-		#if SNAKE_DEBUG == 1
-		std::cout << "using backup path\n";
-		std::cout << "head pos: " <<  std::get<0>(head_pos()) << ", "  << std::get<1>(head_pos()) << "\n";
-		std::cout << "next step: " << std::get<0>(backup_steps.top()) << ", "  << std::get<1>(backup_steps.top()) << "\n";
-		#endif
 		position.push(backup_steps.top());
 		backup_steps.pop();
 		if(map[std::get<0>(position.back())][std::get<1>(position.back())] == 0) position.pop();

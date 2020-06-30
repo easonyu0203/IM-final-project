@@ -11,7 +11,7 @@
 using namespace std;
 
 const pair<int, int> MAP_SIZE = make_pair(50, 50); // including boundary
-const int NUM_FOOD = 3; // food each round
+const int NUM_FOOD = 6; // food each round
 
 int main()
 {
@@ -28,34 +28,12 @@ int main()
 	cant_point.emplace(48,47);
 	cant_point.emplace(47,48);
 	
-	for(int i = 0; i < 20 + rand()%5; i++){
+	for(int i = 0; i < 60; i++){
 		auto point = make_pair(1 + rand()%48, 1+rand()%48);
 		if(cant_point.find(point) == cant_point.end()){
 			barriers.push_back(point);
 		}
 	}
-
-    // // position of barrier, to lazy to make it random, can modify it urself
-    // barriers.push_back(make_pair(6, 6));
-    // barriers.push_back(make_pair(14, 10));
-    // barriers.push_back(make_pair(20, 11));
-    // barriers.push_back(make_pair(21, 31));
-    // barriers.push_back(make_pair(25, 12));
-    // barriers.push_back(make_pair(33, 8));
-    // barriers.push_back(make_pair(9, 36));
-    // barriers.push_back(make_pair(27, 16));
-    // barriers.push_back(make_pair(11, 44));
-    // barriers.push_back(make_pair(15, 22));
-    // barriers.push_back(make_pair(18, 22));
-    // barriers.push_back(make_pair(19, 1));
-    // barriers.push_back(make_pair(1, 30));
-    // barriers.push_back(make_pair(42, 45));
-    // barriers.push_back(make_pair(39, 38));
-    // barriers.push_back(make_pair(45, 26));
-    // barriers.push_back(make_pair(30, 8));
-    // barriers.push_back(make_pair(17, 27));
-    // barriers.push_back(make_pair(7, 20));
-    // barriers.push_back(make_pair(8, 33));
 
     vector<vector<int>> tempMap;
 
@@ -113,7 +91,7 @@ int main()
                     if (map[foodPos.first][foodPos.second] == 0) {
 						// map[foodPos.first][foodPos.second] = rand()%2 + 1;
 						if(have_2){
-							map[foodPos.first][foodPos.second] = 2;
+							map[foodPos.first][foodPos.second] = 1;
 						}
 						else{
                         	map[foodPos.first][foodPos.second] = 2;

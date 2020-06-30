@@ -24,7 +24,7 @@
 //write result to file or not
 #define WRITE_RESULT_TO_FILE 0
 //skip map index to 
-#define SKIP_POINT 100
+#define SKIP_POINT 201
 //milli second per frame
 #define milli_sec_per_frame 60
 
